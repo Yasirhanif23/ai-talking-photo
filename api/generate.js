@@ -16,45 +16,43 @@ export default async function handler(req, res) {
     }
 
     try {
-        // LivePortrait Model on Replicate
-        const response = await fetch('https://api.replicate.com/v1/predictions', {
+        // Updated LivePortrait Prediction API Call
+        const response = await fetch('https://api.replicate.com/v1/models/fofr/live-portrait/predictions', {
             method: 'POST',
             headers: {
-                'Authorization': `Token ${REPLICATE_API_TOKEN}`,
+                'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                version: "fbfb4cc233d69941a3cd4380eb0b36872a3922c1e7a57a550d5e165445f1b138",
                 input: {
                     source_image: source_image,
-                    driving_video: driving_video,
-                    live_portrait_flag: true
+                    driving_video: driving_video
                 }
             })
         });
 
         const prediction = await response.json();
 
-        if (response.status !== 201) {
-            return res.status(response.status).json({ error: prediction.detail || 'API Call Failed' });
+        if (response.status !== 201 && response.status !== 200) {
+            return res.status(response.status).json({ error: prediction.detail || prediction.error || 'API Call Failed' });
         }
 
-        // Poll prediction status until finished
         let statusUrl = prediction.urls.get;
         let outputVideoUrl = null;
 
+        // Poll for completion
         while (!outputVideoUrl) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
             const statusRes = await fetch(statusUrl, {
-                headers: { 'Authorization': `Token ${REPLICATE_API_TOKEN}` }
+                headers: { 'Authorization': `Bearer ${REPLICATE_API_TOKEN}` }
             });
             const statusJson = await statusRes.json();
 
             if (statusJson.status === 'succeeded') {
-                outputVideoUrl = statusJson.output;
+                outputVideoUrl = Array.isArray(statusJson.output) ? statusJson.output[0] : statusJson.output;
                 break;
             } else if (statusJson.status === 'failed' || statusJson.status === 'canceled') {
-                return res.status(500).json({ error: 'AI Video Generation Failed.' });
+                return res.status(500).json({ error: statusJson.error || 'AI Video Generation Failed.' });
             }
         }
 

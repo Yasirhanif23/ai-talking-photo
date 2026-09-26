@@ -1,3 +1,4 @@
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -16,15 +17,14 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Correct predictions endpoint using Bearer Token and official LivePortrait version
-        const response = await fetch('https://api.replicate.com/v1/predictions', {
+        // Direct model endpoint using official fofr/live-portrait slug
+        const response = await fetch('https://api.replicate.com/v1/models/fofr/live-portrait/predictions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                version: "3f3322d7338575a7434f0f0c057632616a62319f39b6e22c062c3e1e2d83e25b",
                 input: {
                     face_image: source_image,
                     driving_video: driving_video
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         let statusUrl = prediction.urls.get;
         let outputVideoUrl = null;
 
-        // Polling loop for completion
+        // Polling loop for result
         while (!outputVideoUrl) {
             await new Promise(resolve => setTimeout(resolve, 3000));
             const statusRes = await fetch(statusUrl, {

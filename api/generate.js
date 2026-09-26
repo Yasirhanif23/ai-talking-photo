@@ -16,15 +16,14 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Active Kwai-Kolors LivePortrait Model Version
-        const response = await fetch('https://api.replicate.com/v1/predictions', {
+        // Direct Model Endpoint (No Version Hash Required)
+        const response = await fetch('https://api.replicate.com/v1/models/kwai-kolors/live-portrait/predictions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                version: "3f3322d7338575a7434f0f0c057632616a62319f39b6e22c062c3e1e2d83e25b",
                 input: {
                     source_image: source_image,
                     driving_video: driving_video

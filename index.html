@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Talking Photo & Expression Lip-Sync Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>TalkifyAI</span>
+        </div>
+        <div class="badge">LivePortrait Engine v2.0</div>
+    </header>
+
+    <!-- Top Ad Banner Placeholder -->
+    <div class="ad-container top-ad">
+        <div class="ad-placeholder">
+            <i class="fa-solid fa-rectangle-ad"></i>
+            <span>Advertisement Space (Top Banner)</span>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <main class="app-container">
+        <div class="hero-text">
+            <h1>Turn Any Photo into an <span class="gradient-text">Expressive Talking Video</span></h1>
+            <p>Upload a portrait photo and a reference video/audio to replicate facial expressions and lip-syncing in seconds.</p>
+        </div>
+
+        <div class="workspace">
+            <!-- Left Panel: Inputs -->
+            <div class="panel input-panel">
+                
+                <!-- Step 1: Photo Input -->
+                <div class="section-box">
+                    <h3><span class="step-num">1</span> Upload Source Photo</h3>
+                    <div class="dropzone" id="photo-dropzone">
+                        <input type="file" id="photo-input" accept="image/*" hidden>
+                        <div class="dropzone-content" id="photo-prompt">
+                            <i class="fa-solid fa-cloud-arrow-up icon-large"></i>
+                            <p><strong>Click to upload</strong> or drag & drop photo</p>
+                            <small>PNG, JPG or WEBP (Max 10MB)</small>
+                        </div>
+                        <div class="preview-container hidden" id="photo-preview-box">
+                            <img id="photo-preview" src="" alt="Source Preview">
+                            <button class="remove-btn" onclick="removeFile('photo')"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Reference Video/Audio Input -->
+                <div class="section-box">
+                    <h3><span class="step-num">2</span> Upload Driving Reference (Video/Audio)</h3>
+                    <div class="dropzone" id="ref-dropzone">
+                        <input type="file" id="ref-input" accept="video/*,audio/*" hidden>
+                        <div class="dropzone-content" id="ref-prompt">
+                            <i class="fa-solid fa-film icon-large"></i>
+                            <p><strong>Upload Video or Audio</strong> dialogue</p>
+                            <small>MP4, MOV, MP3, WAV (Dialogue/Acting source)</small>
+                        </div>
+                        <div class="preview-container hidden" id="ref-preview-box">
+                            <video id="ref-preview" controls class="hidden"></video>
+                            <audio id="ref-audio-preview" controls class="hidden"></audio>
+                            <button class="remove-btn" onclick="removeFile('ref')"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button class="generate-btn" id="generate-btn" onclick="openChoiceModal()">
+                    <i class="fa-solid fa-bolt"></i> Generate Talking Photo
+                </button>
+
+            </div>
+
+            <!-- Right Panel: Output & Controls -->
+            <div class="panel output-panel">
+                
+                <!-- Status & Progress Container -->
+                <div id="status-box" class="status-box hidden">
+                    <div class="spinner"></div>
+                    <h4 id="status-title">Processing AI Model...</h4>
+                    <p id="status-desc">Detecting 3D Facial Landmarks & Mapping Lip Motion</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Video Output Player -->
+                <div id="output-box" class="output-box">
+                    <div class="placeholder-output" id="output-placeholder">
+                        <i class="fa-solid fa-circle-play icon-xlarge"></i>
+                        <p>Your generated lip-sync video will appear here.</p>
+                    </div>
+
+                    <div class="result-container hidden" id="result-container">
+                        <video id="output-video" controls autoplay loop></video>
+                        <div class="output-actions">
+                            <a id="download-link" download="talking_photo.mp4" class="btn btn-success">
+                                <i class="fa-solid fa-download"></i> Download Video
+                            </a>
+                            <button onclick="resetApp()" class="btn btn-secondary">
+                                <i class="fa-solid fa-rotate-left"></i> Create Another
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Ad Unit -->
+                <div class="ad-container side-ad">
+                    <div class="ad-placeholder">
+                        <i class="fa-solid fa-rectangle-ad"></i>
+                        <span>Advertisement Space (Native Banner)</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- NEW: Choice Selection Modal (Watch Ad vs Pay $0.10) -->
+    <div id="choice-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <button class="close-modal" onclick="closeChoiceModal()">&times;</button>
+            <h3><i class="fa-solid fa-unlock-keyhole"></i> Choose How to Generate</h3>
+            <p class="modal-subtext">Select an option to start processing your AI video:</p>
+            
+            <div class="options-grid">
+                <!-- Option 1: Watch Ad (Free) -->
+                <div class="option-card free-card" onclick="startWithAd()">
+                    <div class="option-badge">FREE</div>
+                    <i class="fa-solid fa-tv option-icon"></i>
+                    <h4>Watch Short Ad</h4>
+                    <p>Unlock 1 Free Generation by viewing a quick sponsor ad.</p>
+                    <button class="btn btn-primary btn-full">Watch Ad & Generate</button>
+                </div>
+
+                <!-- Option 2: Pay $0.10 -->
+                <div class="option-card pay-card" onclick="startWithPayment()">
+                    <div class="option-badge pro">FAST</div>
+                    <i class="fa-solid fa-bolt-lightning option-icon gold"></i>
+                    <h4>Pay $0.10</h4>
+                    <p>Skip all ads, get ultra-fast priority rendering & HD export.</p>
+                    <button class="btn btn-gold btn-full">Pay $0.10 & Generate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ad / Download Interstitial Modal -->
+    <div id="ad-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <button class="close-modal" onclick="closeAdModal()">&times;</button>
+            <h3><i class="fa-solid fa-gift"></i> Your AI Video is Ready!</h3>
+            <p>Please support us by viewing our sponsor below to get instant access.</p>
+            
+            <div class="ad-container modal-ad">
+                <div class="ad-placeholder">
+                    <i class="fa-solid fa-rectangle-ad"></i>
+                    <span>Monetag / Adsterra High-eCPM Ad Unit</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-full" onclick="closeAdModal()">Continue to Video</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

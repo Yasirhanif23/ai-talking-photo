@@ -16,8 +16,8 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Direct Model Endpoint (No Version Hash Required)
-        const response = await fetch('https://api.replicate.com/v1/models/kwai-kolors/live-portrait/predictions', {
+        // Correct Replicate endpoint and input format for fofr/live-portrait
+        const response = await fetch('https://api.replicate.com/v1/models/fofr/live-portrait/predictions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 input: {
-                    source_image: source_image,
+                    face_image: source_image,
                     driving_video: driving_video
                 }
             })
